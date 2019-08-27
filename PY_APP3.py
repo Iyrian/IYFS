@@ -53,6 +53,13 @@ def setup():
     #------------------------
     load_map()
     return
+def restart():
+    g.enemies = []
+    g.mushroom = Mushroom()
+    g.mushroom.valid = False
+    load_map()
+    g.CAMERA_STGX = 0.0
+    return
 #define button pos---------------------------------
 button_width = 100
 button_height = 22
@@ -77,6 +84,10 @@ def run(isAICtrl = False, isModelLoaded = False):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     return
+                if g.Mario.dead and event.type == pg.KEYDOWN:
+                    if event.key == pg.K_r:
+                        g.Mario = Mario()
+                        restart()
             #render----------------------
             g.SCN_SURFACE.fill(g.SCN_BACKCOLOR)
             show_map()
@@ -107,6 +118,11 @@ def run(isAICtrl = False, isModelLoaded = False):
             #----------------------------
     else:
         best_score = 0
+        cur_id = 0
+        mario_score = 0
+        distance_left = 0
+        distance_moved = 0
+        life_left = 0
         if not isModelLoaded:
             g.Pop = Population(g.POP_SIZE, g.POP_PM, g.POP_PC)
             g.Pop.init_pos(g.Mario.stg_x, g.Mario.stg_y)
@@ -116,18 +132,18 @@ def run(isAICtrl = False, isModelLoaded = False):
                     return
                 if event.type == pg.MOUSEBUTTONDOWN:  # 判断鼠标位置以及是否摁了下去。
                     pg.event.clear(pg.MOUSEBUTTONDOWN)
-                    if button_save_x <= event[0] <= button_save_x + button_width:
-                        if button_save_y <= event[1] <= button_save_y + button_height:#save
+                    if button_save_x <= event.pos[0] <= button_save_x + button_width:
+                        if button_save_y <= event.pos[1] <= button_save_y + button_height:#save
                             if not isModelLoaded:
                                 g.Pop.bestMario.brain.save()
                             else:
                                 g.Mario.brain.save()
-                        elif button_save_as_y <= event[1] <= button_save_as_y + button_height:#save as
+                        elif button_save_as_y <= event.pos[1] <= button_save_as_y + button_height:#save as
                             if not isModelLoaded:
                                 g.Pop.bestMario.brain.save_as()
                             else:
                                 g.Mario.brain.save_as()
-                        elif button_load_y <= event[1] <= button_load_y + button_height:#load
+                        elif button_load_y <= event.pos[1] <= button_load_y + button_height:#load
                             if not isModelLoaded:
                                 g.Pop.bestMario.brain.load()
                             else:
@@ -144,31 +160,58 @@ def run(isAICtrl = False, isModelLoaded = False):
                         g.enemies[i].update()
                         g.enemies[i].show()
             if not isModelLoaded:
-                if g.Pop.done():
-                    print("---------------------ALL DEAD---------------------")
+                if cur_id > len(g.Pop.marios):
+                    print("\n---------------------ALL DEAD---------------------")
                     g.Pop.generate_next()
-                    load_map()
-                    g.CAMERA_STGX = 0.0
+                    restart()
+                    cur_id = 0
                 else:
-                    g.Pop.update()
-                    g.Pop.show()
-                    if g.Pop.bestMario.dead:
-                        dead = g.Font_Big.render(g.Pop.bestMario.dead_reason, True, (255, 0, 0))
-                        g.SCN_SURFACE.blit(dead, (0.5 * (g.SCN_WIDTH - dead.get_rect().width), 0.5 * g.SCN_HEIGHT))
+                    #g.Pop.update()
+                    #g.Pop.show()
+                    if cur_id == 0:
+                        g.Pop.bestMario.think()
+                        g.Pop.bestMario.update()
+                        g.Pop.bestMario.show()
+                        mario_score = g.Pop.bestMario.score
+                        distance_moved = g.Pop.bestMario.distance_passed
+                        distance_left = g.DST_STGX - g.Pop.bestMario.stg_x
+                        life_left = g.Pop.bestMario.lifeLeft
+                        if g.Pop.bestMario.dead:
+                            print("No0. Mario Dead, Reason<{}>".format(g.Pop.bestMario.dead_reason))
+                            #dead = g.Font_Big.render(g.Pop.bestMario.dead_reason, True, (255, 0, 0))
+                            #g.SCN_SURFACE.blit(dead, (0.5 * (g.SCN_WIDTH - dead.get_rect().width), 0.5 * g.SCN_HEIGHT))
+                            cur_id += 1
+                            restart()
+                        else:
+                            CAMERA_MOVE(g.Pop.bestMario.stg_x)                       
                     else:
-                        CAMERA_MOVE(g.Pop.bestMario.stg_x)
+                        g.Pop.marios[cur_id - 1].think()
+                        g.Pop.marios[cur_id - 1].update()
+                        g.Pop.marios[cur_id - 1].show()
+                        mario_score = g.Pop.marios[cur_id - 1].score
+                        distance_moved = g.Pop.marios[cur_id - 1].distance_passed
+                        distance_left = g.DST_STGX - g.Pop.marios[cur_id - 1].stg_x
+                        life_left = g.Pop.marios[cur_id - 1].lifeLeft
+                        if g.Pop.marios[cur_id - 1].dead:
+                            print("No{}. Mario Dead, Reason<{}>".format(cur_id, g.Pop.marios[cur_id - 1].dead_reason))
+                            #dead = g.Font_Big.render(g.Pop.marios[cur_id - 1].dead_reason, True, (255, 0, 0))
+                            #g.SCN_SURFACE.blit(dead, (0.5 * (g.SCN_WIDTH - dead.get_rect().width), 0.5 * g.SCN_HEIGHT))
+                            cur_id += 1
+                            restart()
+                        else:
+                            CAMERA_MOVE(g.Pop.marios[cur_id - 1].stg_x)         
                 #renering digital sys-----------------------------------------------------------------
-                generation = g.Font_Small.render("Generation<{}>".format(g.Pop.generation), True, (0, 0, 0))
+                generation = g.Font_Small.render("Generation<{}>, No{}. Mario".format(g.Pop.generation, cur_id), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(generation, (1, 0))
                 score = g.Font_Small.render("BestScore<{}>".format(g.Pop.bestScore), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(score, (1, 24))
-                score = g.Font_Small.render("Score<{}>".format(g.Pop.bestMario.score), True, (0, 0, 0))
+                score = g.Font_Small.render("Score<{}>".format(mario_score), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(score, (1, 48))
-                life_left = g.Font_Small.render("LifeLeft<{}>".format(g.Pop.bestMario.lifeLeft), True, (0, 0, 0))
-                g.SCN_SURFACE.blit(life_left, (1, 72))
-                distance = g.Font_Small.render("Moved<{}/km>".format(g.Pop.bestMario.distance_passed), True, (0, 0, 0))
+                tlife_left = g.Font_Small.render("LifeLeft<{}>".format(life_left), True, (0, 0, 0))
+                g.SCN_SURFACE.blit(tlife_left, (1, 72))
+                distance = g.Font_Small.render("Moved<{}/km>".format(distance_moved), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(distance, (0, 96))
-                distance = g.Font_Small.render("DistanceLeft<{}/km>".format(g.DST_STGX - g.Pop.bestMario.stg_x), True, (0, 0, 0))
+                distance = g.Font_Small.render("DistanceLeft<{}/km>".format(distance_left), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(distance, (0, 120))
                 #-------------------------------------------------------------------------------------
             else:
@@ -184,8 +227,7 @@ def run(isAICtrl = False, isModelLoaded = False):
                     if best_score < g.Mario.score:
                         best_score = g.Mario.score
                     g.Mario = g.Mario.clone()
-                    load_map()
-                    g.CAMERA_STGX = 0.0
+                    restart()
                 #renering digital sys-----------------------------------------------------------------
                 score = g.Font_Small.render("BestScore<{}>".format(best_score), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(score, (1, 0))

@@ -46,7 +46,8 @@ class Mario(object):
         self.brain.mutate(pm)
         return
     def calculate_fitness(self):
-        self.fitness = ((10.0 * self.distance_passed) + (3.0 * self.lifetime)) * (10.0 * self.score + 1)
+        self.fitness = ((3.0 * self.distance_passed) + self.lifetime + self.score) *\
+           ((g.MAP_WIDTH * g.BLOCK_SIZE - self.distance_left) ** 2)
         return
     def look(self):
         add_to = self.look_in_direction(0.0)
@@ -126,18 +127,17 @@ class Mario(object):
         self.descision = self.brain.output(self.vision)
         if self.descision[0] < self.descision[1]:#move left
             self.mv_x = -self.spd
-            #self.move_descision = "LEFT"
+            self.move_descision = "LEFT"
         else:
             self.mv_x = self.spd
-            #self.move_descision = "RIGHT"
+            self.move_descision = "RIGHT"
         if self.descision[2] < self.descision[3]:
             if not self.jump:
                 self.jump = True
                 self.mv_y = -self.spd_y
-                #self.move_descision += "-JUMP"
+                self.move_descision += "_JUMP"
         return
     def update(self):       
-        self.distance_passed += abs(self.mv_x)
         self.mv_y += g.GRAVITY
         #collision judge:
         bid_y = g.to_block_pos(self.stg_y + self.mv_y)
@@ -150,8 +150,10 @@ class Mario(object):
             self.stg_x = g.to_block_pos(self.stg_x + self.mv_x) * g.BLOCK_SIZE
             self.mv_x = 0.0
         if g.TRANSX_STG_TO_SCN(self.stg_x) < 0.0:
+            self.mv_x = 0.0
             self.stg_x = g.TRANSX_SCN_TO_STG(0.0)
             #self.stg_x = g.to_block_pos(self.stg_x) * g.BLOCK_SIZE
+        self.distance_passed += abs(self.mv_x)
         val = g.MAP[g.to_block_pos(self.stg_y + self.mv_y) + 1][g.to_block_pos(self.stg_x)] #检查地面
         on_ground = False
         if val != 0:
@@ -269,7 +271,7 @@ class Mario(object):
         self.update()
         return
     def show(self):
-        #print(self.move_descision)
+        print("\rMove<{}>\t\t".format(self.move_descision), end = "")
         if self.extraLife:
            pg.draw.rect(g.SCN_SURFACE, [150, 0, 0],\
                 pg.Rect(g.TRANSX_STG_TO_SCN(self.stg_x) - 0.5 * (g.BLOCK_SIZE + 5),\
@@ -279,5 +281,16 @@ class Mario(object):
                 pg.draw.rect(g.SCN_SURFACE, [255, 0, 0],\
                     pg.Rect(g.TRANSX_STG_TO_SCN(self.stg_x) - 0.5 * (g.BLOCK_SIZE - 1),\
                     self.stg_y - 0.5 * (g.BLOCK_SIZE - 1), g.BLOCK_SIZE - 1, g.BLOCK_SIZE - 1))
-
+        #draw look line
+        scn_x = g.TRANSX_STG_TO_SCN(self.stg_x)
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (g.SCN_WIDTH, self.stg_y))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (0.0, self.stg_y))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (scn_x, 0))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (scn_x, g.SCN_HEIGHT))
+        dx = g.SCN_WIDTH - scn_x
+        dy = g.SCN_HEIGHT - self.stg_y
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (g.SCN_WIDTH, self.stg_y + dx))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (g.SCN_WIDTH, self.stg_y - dx))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (0, self.stg_y + scn_x))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (0, self.stg_y - scn_x))
         return
