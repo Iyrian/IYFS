@@ -99,9 +99,9 @@ class Mario(object):
             gy = g.to_block_pos(cur_y)
             gx = g.to_block_pos(cur_x)
             if gx < 0.0 or gy < 0.0:
-                continue
+                return rst#directly return?
             if gy > g.MAP_HEIGHT - 1 or gx > g.MAP_WIDTH - 1:
-                continue
+                return rst#directly return?
             if g.MAP[gy][gx] == g.MAP_ENUM_SPBRICK:
                 rst[0] = 1.0
                 if rst[5] == 0.0:
@@ -114,21 +114,17 @@ class Mario(object):
                 rst[2] = 1.0
                 if rst[7] == 0.0:
                     rst[7] = step / g.SCN_HEIGHT
-            if g.mushroom != None:
+            if g.mushroom.valid:
                 if g.check_collide(self.stg_x, self.stg_y, g.mushroom.stg_x, g.mushroom.stg_y):
                     rst[3] = 1.0
                     if rst[8] == 0.0:
                         rst[8] = step / g.SCN_HEIGHT
             #enemies
-            distance = 10000.0
             for j in range(len(g.enemies)):
                 if (not g.enemies[j].dead) and g.enemies[j].in_screen():
-                    dx = g.enemies[j].stg_x - self.stg_x
-                    dy = g.enemies[j].stg_y - self.stg_y
-                    dst = math.sqrt(dx ** 2 + dy ** 2)
-                    if dst < distance:
-                        rst[4] = dst / g.SCN_WIDTH
-                        distance = dst
+                    if g.check_collide(cur_x, cur_y,\
+                        g.enemies[j].stg_x, g.enemies[j].stg_y):
+                        rst[4] = step / g.SCN_HEIGHT
         return rst
     #look,grep inputs
     #trans to NN
