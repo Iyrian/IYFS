@@ -135,17 +135,26 @@ def run(isAICtrl = False, isModelLoaded = False):
                     if button_save_x <= event.pos[0] <= button_save_x + button_width:
                         if button_save_y <= event.pos[1] <= button_save_y + button_height:#save
                             if not isModelLoaded:
-                                g.Pop.bestMario.brain.save()
+                                if cur_id == 0:
+                                    g.Pop.bestMario.brain.save()
+                                else:
+                                    g.Pop.marios[cur_id - 1].brain.save()
                             else:
                                 g.Mario.brain.save()
                         elif button_save_as_y <= event.pos[1] <= button_save_as_y + button_height:#save as
                             if not isModelLoaded:
-                                g.Pop.bestMario.brain.save_as()
+                                if cur_id == 0:
+                                    g.Pop.bestMario.brain.save_as()
+                                else:
+                                    g.Pop.marios[cur_id - 1].brain.save_as()
                             else:
                                 g.Mario.brain.save_as()
                         elif button_load_y <= event.pos[1] <= button_load_y + button_height:#load
                             if not isModelLoaded:
-                                g.Pop.bestMario.brain.load()
+                                if cur_id == 0:
+                                    g.Pop.bestMario.brain.load()
+                                else:
+                                    g.Pop.marios[cur_id - 1].brain.load()
                             else:
                                 g.Mario.brain.load()
             #render----------------------
@@ -210,9 +219,9 @@ def run(isAICtrl = False, isModelLoaded = False):
                 tlife_left = g.Font_Small.render("LifeLeft<{}>".format(life_left), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(tlife_left, (1, 72))
                 distance = g.Font_Small.render("Moved<{}/km>".format(distance_moved), True, (0, 0, 0))
-                g.SCN_SURFACE.blit(distance, (0, 96))
+                g.SCN_SURFACE.blit(distance, (1, 96))
                 distance = g.Font_Small.render("DistanceLeft<{}/km>".format(distance_left), True, (0, 0, 0))
-                g.SCN_SURFACE.blit(distance, (0, 120))
+                g.SCN_SURFACE.blit(distance, (1, 120))
                 #-------------------------------------------------------------------------------------
             else:
                 if not g.Mario.dead:
@@ -234,9 +243,9 @@ def run(isAICtrl = False, isModelLoaded = False):
                 score = g.Font_Small.render("Score<{}>".format(g.Mario.score), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(score, (1, 24))
                 distance = g.Font_Small.render("Moved<{}/km>".format(g.Mario.distance_passed), True, (0, 0, 0))
-                g.SCN_SURFACE.blit(distance, (0, 48))
+                g.SCN_SURFACE.blit(distance, (1, 48))
                 distance = g.Font_Small.render("DistanceLeft<{}/km>".format(g.DST_STGX - g.Mario.stg_x), True, (0, 0, 0))
-                g.SCN_SURFACE.blit(distance, (0, 72))
+                g.SCN_SURFACE.blit(distance, (1, 72))
                 #-------------------------------------------------------------------------------------
             #draw buttons---------------------
             pg.draw.rect(g.SCN_SURFACE, (0 , 0, 0), pg.Rect(button_save_x, button_save_y, button_width, button_height), 1)

@@ -85,6 +85,7 @@ class Population(object):
         #---------------------------------------------
         self.set_best()
         next_generation = []
+        self.generation += 1
         for i in range(len(self.marios)):
             if i % 2 == 0:
                 print("\tG<{}> new NO.{} Mario".format(self.generation, i))
@@ -96,7 +97,6 @@ class Population(object):
         #copy back
         for i in range(len(self.marios)):
             self.marios[i] = next_generation[i]
-        self.generation += 1
         return
     #--------------------------------------------------------------------
     def init_pos(self, stg_x, stg_y):

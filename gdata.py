@@ -24,7 +24,7 @@ NN_HIDDENLAYER_NUM : int = 2
 #fixed hidden layer size
 NN_HIDDEN_SIZE : int = 18
 POP_SIZE = 10#种群数
-POP_PM = 0.2#变异率
+POP_PM = 0.1#变异率
 POP_PC = 0.7#交叉率
 #----------------------------------
 GRAVITY = 0.1

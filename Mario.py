@@ -47,8 +47,8 @@ class Mario(object):
         self.brain.mutate(pm)
         return
     def calculate_fitness(self):
-        self.fitness = ((3.0 * self.distance_passed) + self.lifetime + self.score) *\
-           ((g.MAP_WIDTH * g.BLOCK_SIZE - self.distance_left) ** 2)
+        self.fitness = ((2.0 * self.distance_passed) + self.lifetime + 2.0 * self.score) *\
+           ((self.stg_x) ** 2)
         return
     def look(self):
         add_to = self.look_in_direction(0.0)
@@ -105,29 +105,30 @@ class Mario(object):
             if g.MAP[gy][gx] == g.MAP_ENUM_SPBRICK:
                 rst[0] = 1.0
                 if rst[5] == 0.0:
-                    rst[5] = step
+                    rst[5] = step / g.SCN_HEIGHT
             elif g.MAP[gy][gx] == g.MAP_ENUM_WALL_X:
                 rst[1] = 1.0
                 if rst[6] == 0.0:
-                    rst[6] = step
+                    rst[6] = step / g.SCN_HEIGHT
             elif g.MAP[gy][gx] == g.MAP_ENUM_WALL_Y:
                 rst[2] = 1.0
                 if rst[7] == 0.0:
-                    rst[7] = step
+                    rst[7] = step / g.SCN_HEIGHT
             if g.mushroom != None:
                 if g.check_collide(self.stg_x, self.stg_y, g.mushroom.stg_x, g.mushroom.stg_y):
                     rst[3] = 1.0
                     if rst[8] == 0.0:
-                        rst[8] = step
+                        rst[8] = step / g.SCN_HEIGHT
             #enemies
             distance = 10000.0
             for j in range(len(g.enemies)):
-                dx = g.enemies[j].stg_x - self.stg_x
-                dy = g.enemies[j].stg_y - self.stg_y
-                dst = math.sqrt(dx ** 2 + dy ** 2)
-                if dst < distance:
-                    rst[4] = dst
-                    distance = dst
+                if (not g.enemies[j].dead) and g.enemies[j].in_screen():
+                    dx = g.enemies[j].stg_x - self.stg_x
+                    dy = g.enemies[j].stg_y - self.stg_y
+                    dst = math.sqrt(dx ** 2 + dy ** 2)
+                    if dst < distance:
+                        rst[4] = dst / g.SCN_WIDTH
+                        distance = dst
         return rst
     #look,grep inputs
     #trans to NN
@@ -138,12 +139,17 @@ class Mario(object):
         self.look()
         #grep NN output
         self.descision = self.brain.output(self.vision)
-        if self.descision[0] < self.descision[1]:#move left
-            self.mv_x = -self.spd
-            self.move_descision = "LEFT"
+        dlt = abs(self.descision[0] - self.descision[1])
+        if dlt < 0.1:
+            self.mv_x = 0.0
+            self.move_descision = "STOP"
         else:
-            self.mv_x = self.spd
-            self.move_descision = "RIGHT"
+            if self.descision[0] < self.descision[1]:#move left
+                self.mv_x = -self.spd
+                self.move_descision = "LEFT"
+            else:
+                self.mv_x = self.spd
+                self.move_descision = "RIGHT"
         if self.descision[2] < self.descision[3]:
             if not self.jump:
                 self.jump = True
