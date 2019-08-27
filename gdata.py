@@ -18,11 +18,11 @@ MAP_ENUM_WALL_Y = 2
 MAP_ENUM_BRICK = 3
 MAP_ENUM_SPBRICK = 4
 #define NN shape-------------------
-NN_INPUT_SIZE : int = 72 #8 * 9
+NN_INPUT_SIZE : int = 108 #12 * 9
 NN_OUTPUT_SIZE : int = 4
 NN_HIDDENLAYER_NUM : int = 2
 #fixed hidden layer size
-NN_HIDDEN_SIZE : int = 12
+NN_HIDDEN_SIZE : int = 18
 POP_SIZE = 10#种群数
 POP_PM = 0.2#变异率
 POP_PC = 0.7#交叉率

@@ -4,6 +4,7 @@ from MoveObjs import Mushroom
 import math
 import pygame as pg
 from random import random
+time_out_limit = 150
 class Mario(object):
     def __init__(self):
         self.dead_reason = ""
@@ -20,7 +21,7 @@ class Mario(object):
         self.extraLife = False
 
         self.score = 0
-        self.lifeLeft = 100
+        self.lifeLeft = time_out_limit
         self.lifetime = 0
         self.fitness = 0
         
@@ -74,6 +75,18 @@ class Mario(object):
         add_to = self.look_in_direction(7.0 * math.pi / 4.0)
         for i in range(9):
             self.vision[i + 63] = add_to[i]
+        add_to = self.look_in_direction(3.0 * math.pi / 8.0)
+        for i in range(9):
+            self.vision[i + 72] = add_to[i]
+        add_to = self.look_in_direction(5.0 * math.pi / 8.0)
+        for i in range(9):
+            self.vision[i + 81] = add_to[i]
+        add_to = self.look_in_direction(-math.pi / 8.0)
+        for i in range(9):
+            self.vision[i + 81] = add_to[i]
+        add_to = self.look_in_direction(math.pi / 8.0)
+        for i in range(9):
+            self.vision[i + 81] = add_to[i]
         return
     #angle : in arc
     def look_in_direction(self, angle):
@@ -242,7 +255,7 @@ class Mario(object):
             dx = g.DST_STGX - self.stg_x
             if dx < self.distance_left:
                 self.distance_left = dx
-                self.lifeLeft = 100 #restart
+                self.lifeLeft = time_out_limit #restart
             else:
                 self.dead = True
                 self.dead_reason = "Time out"
@@ -293,4 +306,11 @@ class Mario(object):
         pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (g.SCN_WIDTH, self.stg_y - dx))
         pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (0, self.stg_y + scn_x))
         pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (0, self.stg_y - scn_x))
+        dx = dy * math.tan(math.pi / 8)
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (scn_x + dx, g.SCN_HEIGHT))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (scn_x - dx, g.SCN_HEIGHT))
+        dx = g.SCN_WIDTH - scn_x
+        dy = dx * math.tan(math.pi / 8)
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (g.SCN_WIDTH, self.stg_y + dy))
+        pg.draw.line(g.SCN_SURFACE, (0, 0, 255), (scn_x, self.stg_y), (g.SCN_WIDTH, self.stg_y - dy))
         return
