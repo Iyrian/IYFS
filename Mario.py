@@ -126,15 +126,15 @@ class Mario(object):
         self.descision = self.brain.output(self.vision)
         if self.descision[0] < self.descision[1]:#move left
             self.mv_x = -self.spd
-            self.move_descision = "LEFT"
+            #self.move_descision = "LEFT"
         else:
             self.mv_x = self.spd
-            self.move_descision = "RIGHT"
+            #self.move_descision = "RIGHT"
         if self.descision[2] < self.descision[3]:
             if not self.jump:
                 self.jump = True
                 self.mv_y = -self.spd_y
-                self.move_descision += "-JUMP"
+                #self.move_descision += "-JUMP"
         return
     def update(self):       
         self.distance_passed += abs(self.mv_x)
@@ -231,7 +231,7 @@ class Mario(object):
                             return
         if self.unrivalled != 0:
             self.unrivalled -= 1
-        if g.check_collide(self.stg_x, self.stg_y, g.DST_STGX, g.DST_STGY):
+        if self.stg_x > g.DST_STGX:
             self.dead = True
             self.dead_reason = "Reach Destination"
             self.score += 10000
@@ -269,7 +269,7 @@ class Mario(object):
         self.update()
         return
     def show(self):
-        print(self.move_descision)
+        #print(self.move_descision)
         if self.extraLife:
            pg.draw.rect(g.SCN_SURFACE, [150, 0, 0],\
                 pg.Rect(g.TRANSX_STG_TO_SCN(self.stg_x) - 0.5 * (g.BLOCK_SIZE + 5),\

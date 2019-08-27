@@ -56,6 +56,8 @@ class Population(object):
                 self.bestFitness = self.bestMario.fitness
             self.bestScore = self.bestMario.score
             self.bestMario = self.bestMario.clone()
+        self.bestMario.stg_x = g.Mario.stg_x
+        self.bestMario.stg_y = g.Mario.stg_y
         return
     def select_parent(self):
         rand = random.uniform(0,self.fitnessSum)
@@ -84,9 +86,11 @@ class Population(object):
         self.set_best()
         next_generation = []
         for i in range(len(self.marios)):
-            if i % 200 == 0:
+            if i % 2 == 0:
                 print("\tG<{}> new NO.{} Mario".format(self.generation, i))
             child = self.select_parent().crossover(self.select_parent())
+            child.stg_x = g.Mario.stg_x
+            child.stg_y = g.Mario.stg_y
             child.mutate(self.pm)
             next_generation.append(child)
         #copy back

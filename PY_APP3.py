@@ -53,6 +53,14 @@ def setup():
     #------------------------
     load_map()
     return
+#define button pos---------------------------------
+button_width = 100
+button_height = 22
+button_save_x = g.SCN_WIDTH - button_width - 2
+button_save_y = 2
+button_save_as_y = button_save_y + 24
+button_load_y = button_save_as_y + 24
+#--------------------------------------------------
 def run(isAICtrl = False, isModelLoaded = False):
     pg.init()
     os.environ['SDL_VIDEO_WINDOW_POS'] = "%d, %d"%(0,30)
@@ -60,6 +68,9 @@ def run(isAICtrl = False, isModelLoaded = False):
        pg.DOUBLEBUF)
     pg.display.set_caption("SimpleMario?")
     setup() 
+    t_save = g.Font_Small.render("Save", True, (0, 0, 0))
+    t_save_as = g.Font_Small.render("Save As", True, (0, 0, 0))
+    t_load = g.Font_Small.render("Load", True, (0, 0, 0))
     if not isAICtrl:
         best_score = 0
         while True:
@@ -103,6 +114,24 @@ def run(isAICtrl = False, isModelLoaded = False):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     return
+                if event.type == pg.MOUSEBUTTONDOWN:  # 判断鼠标位置以及是否摁了下去。
+                    pg.event.clear(pg.MOUSEBUTTONDOWN)
+                    if button_save_x <= event[0] <= button_save_x + button_width:
+                        if button_save_y <= event[1] <= button_save_y + button_height:#save
+                            if not isModelLoaded:
+                                g.Pop.bestMario.brain.save()
+                            else:
+                                g.Mario.brain.save()
+                        elif button_save_as_y <= event[1] <= button_save_as_y + button_height:#save as
+                            if not isModelLoaded:
+                                g.Pop.bestMario.brain.save_as()
+                            else:
+                                g.Mario.brain.save_as()
+                        elif button_load_y <= event[1] <= button_load_y + button_height:#load
+                            if not isModelLoaded:
+                                g.Pop.bestMario.brain.load()
+                            else:
+                                g.Mario.brain.load()
             #render----------------------
             g.SCN_SURFACE.fill(g.SCN_BACKCOLOR)
             show_map()
@@ -118,6 +147,8 @@ def run(isAICtrl = False, isModelLoaded = False):
                 if g.Pop.done():
                     print("---------------------ALL DEAD---------------------")
                     g.Pop.generate_next()
+                    load_map()
+                    g.CAMERA_STGX = 0.0
                 else:
                     g.Pop.update()
                     g.Pop.show()
@@ -135,8 +166,10 @@ def run(isAICtrl = False, isModelLoaded = False):
                 g.SCN_SURFACE.blit(score, (1, 48))
                 life_left = g.Font_Small.render("LifeLeft<{}>".format(g.Pop.bestMario.lifeLeft), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(life_left, (1, 72))
-                #distance = g.Font_Small.render("DistanceLeft<{}>".format(g.Pop.bestMario.distance_left), True, (0, 0, 0))
-                #g.SCN_SURFACE.blit(distance, (0, 96))
+                distance = g.Font_Small.render("Moved<{}/km>".format(g.Pop.bestMario.distance_passed), True, (0, 0, 0))
+                g.SCN_SURFACE.blit(distance, (0, 96))
+                distance = g.Font_Small.render("DistanceLeft<{}/km>".format(g.DST_STGX - g.Pop.bestMario.stg_x), True, (0, 0, 0))
+                g.SCN_SURFACE.blit(distance, (0, 120))
                 #-------------------------------------------------------------------------------------
             else:
                 if not g.Mario.dead:
@@ -148,15 +181,28 @@ def run(isAICtrl = False, isModelLoaded = False):
                     dead = g.Font_Big.render(g.Mario.dead_reason, True, (255, 0, 0))
                     g.SCN_SURFACE.blit(dead, (0.5 * (g.SCN_WIDTH - dead.get_rect().width), 0.5 * g.SCN_HEIGHT))
                     time.sleep(5)
-                    g.Mario = g.Mario.clone()
                     if best_score < g.Mario.score:
                         best_score = g.Mario.score
+                    g.Mario = g.Mario.clone()
+                    load_map()
+                    g.CAMERA_STGX = 0.0
                 #renering digital sys-----------------------------------------------------------------
                 score = g.Font_Small.render("BestScore<{}>".format(best_score), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(score, (1, 0))
                 score = g.Font_Small.render("Score<{}>".format(g.Mario.score), True, (0, 0, 0))
                 g.SCN_SURFACE.blit(score, (1, 24))
+                distance = g.Font_Small.render("Moved<{}/km>".format(g.Mario.distance_passed), True, (0, 0, 0))
+                g.SCN_SURFACE.blit(distance, (0, 48))
+                distance = g.Font_Small.render("DistanceLeft<{}/km>".format(g.DST_STGX - g.Mario.stg_x), True, (0, 0, 0))
+                g.SCN_SURFACE.blit(distance, (0, 72))
                 #-------------------------------------------------------------------------------------
+            #draw buttons---------------------
+            pg.draw.rect(g.SCN_SURFACE, (0 , 0, 0), pg.Rect(button_save_x, button_save_y, button_width, button_height), 1)
+            pg.draw.rect(g.SCN_SURFACE, (0 , 0, 0), pg.Rect(button_save_x, button_save_as_y, button_width, button_height), 1)
+            pg.draw.rect(g.SCN_SURFACE, (0 , 0, 0), pg.Rect(button_save_x, button_load_y, button_width, button_height), 1)
+            g.SCN_SURFACE.blit(t_save, (button_save_x + 8, button_save_y))
+            g.SCN_SURFACE.blit(t_save_as, (button_save_x + 8, button_save_as_y))
+            g.SCN_SURFACE.blit(t_load, (button_save_x + 8, button_load_y))
             pg.display.flip()
             #----------------------------
     return
