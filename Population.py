@@ -87,7 +87,7 @@ class Population(object):
         next_generation = []
         self.generation += 1
         for i in range(len(self.marios)):
-            if i % 2 == 0:
+            if i % 20 == 0:
                 print("\tG<{}> new NO.{} Mario".format(self.generation, i))
             child = self.select_parent().crossover(self.select_parent())
             child.stg_x = g.Mario.stg_x

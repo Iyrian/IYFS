@@ -1,4 +1,4 @@
-import math
+﻿import math
 SCN_WIDTH = 640
 SCN_HEIGHT = 480
 
@@ -23,7 +23,7 @@ NN_OUTPUT_SIZE : int = 4
 NN_HIDDENLAYER_NUM : int = 2
 #fixed hidden layer size
 NN_HIDDEN_SIZE : int = 18
-POP_SIZE = 10#种群数
+POP_SIZE = 100#种群数
 POP_PM = 0.1#变异率
 POP_PC = 0.7#交叉率
 #----------------------------------

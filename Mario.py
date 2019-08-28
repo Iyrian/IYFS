@@ -1,10 +1,10 @@
-import gdata as g
+﻿import gdata as g
 from NeuroNetwork import NeuralNet
 from MoveObjs import Mushroom
 import math
 import pygame as pg
 from random import random
-time_out_limit = 150
+time_out_limit = 250
 class Mario(object):
     def __init__(self):
         self.dead_reason = ""
@@ -170,13 +170,11 @@ class Mario(object):
             #self.stg_x = g.to_block_pos(self.stg_x) * g.BLOCK_SIZE
         self.distance_passed += abs(self.mv_x)
         val = g.MAP[g.to_block_pos(self.stg_y + self.mv_y) + 1][g.to_block_pos(self.stg_x)] #检查地面
-        on_ground = False
         if val != 0:
             if self.mv_y > 0.0:
                 self.stg_y = g.to_block_pos(self.stg_y + self.mv_y) * g.BLOCK_SIZE
                 self.mv_y = 0.0
-            self.jump = False
-            on_ground = True
+                self.jump = False
 
         if self.stg_y < 0.0:
             self.stg_y = 0.0
@@ -219,8 +217,8 @@ class Mario(object):
         bid_x = g.to_block_pos(self.stg_x)
         val = g.MAP[bid_y][bid_x]
         if val != 0:
-            self.stg_x = (bid_x + 1 if self.mv_x > 0.0 else -1)* g.BLOCK_SIZE
-            self.stg_y = (bid_y + 1 if self.mv_y > 0.0 else -1)* g.BLOCK_SIZE
+            self.stg_x = (bid_x + (-1 if self.mv_x > 0.0 else 1))* g.BLOCK_SIZE
+            self.stg_y = (bid_y + (-1 if self.mv_y > 0.0 else 1))* g.BLOCK_SIZE
             #self.stg_x = g.to_block_pos(self.stg_x) * g.BLOCK_SIZE
         #check state
         if self.stg_y > g.SCN_HEIGHT - 2 * g.BLOCK_SIZE:
@@ -251,7 +249,7 @@ class Mario(object):
         if self.stg_x > g.DST_STGX:
             self.dead = True
             self.dead_reason = "Reach Destination"
-            self.score += 10000
+            self.score += 1000000
             return
         if self.lifeLeft == 0:
             dx = g.DST_STGX - self.stg_x
@@ -264,12 +262,6 @@ class Mario(object):
                 return
         self.lifetime += 1
         self.lifeLeft -= 1
-        #bid_x = g.to_block_pos(self.stg_x)
-        #bid_y = g.to_block_pos(self.stg_y)
-        #rect = g.get_block_rect(bid_x, bid_y)
-        #if g.check_collide_rect(rect, self.stg_x, self.stg_y):#shift pos
-        #    self.stg_x = bid_x * g.BLOCK_SIZE
-        #    self.stg_y = bid_y * g.BLOCK_SIZE
         return
     def human_ctrl(self):
         keys = pg.key.get_pressed()
@@ -284,6 +276,7 @@ class Mario(object):
                 self.jump = True
                 self.mv_y = -self.spd_y
         self.update()
+        self.lifeLeft = time_out_limit
         return
     def show(self):
         print("\rMove<{}>\t\t".format(self.move_descision), end = "")
